@@ -5,6 +5,8 @@ import pytest
 from json_source_map import (
     CARRIAGE_RETURN,
     CONTROL_CHARACTER,
+    ESCAPE,
+    QUOTATION_MARK,
     RETURN,
     SPACE,
     TAB,
@@ -140,6 +142,74 @@ from json_source_map import (
             id=f"end whitespace {repr(whitespace)}",
         )
         for whitespace in WHITESPACE
+    ]
+    + [
+        pytest.param(
+            "true",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4)))],
+            Location(0, 4, 4),
+            id="true primitive",
+        ),
+        pytest.param(
+            "false",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5)))],
+            Location(0, 5, 5),
+            id="false primitive",
+        ),
+        pytest.param(
+            "null",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4)))],
+            Location(0, 4, 4),
+            id="null primitive",
+        ),
+    ]
+    + [
+        pytest.param(
+            f"{QUOTATION_MARK}{QUOTATION_MARK}",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+            Location(0, 2, 2),
+            id="empty string primitive",
+        ),
+    ]
+    + [
+        pytest.param(
+            f"{QUOTATION_MARK}a{QUOTATION_MARK}",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 3, 3)))],
+            Location(0, 3, 3),
+            id="single character string primitive",
+        ),
+    ]
+    + [
+        pytest.param(
+            f"{QUOTATION_MARK}aa{QUOTATION_MARK}",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4)))],
+            Location(0, 4, 4),
+            id="multi character string primitive",
+        ),
+    ]
+    + [
+        pytest.param(
+            f"{QUOTATION_MARK}aaa{QUOTATION_MARK}",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5)))],
+            Location(0, 5, 5),
+            id="many character string primitive",
+        ),
+    ]
+    + [
+        pytest.param(
+            f"{QUOTATION_MARK}{ESCAPE}{QUOTATION_MARK}{QUOTATION_MARK}",
+            Location(0, 0, 0),
+            [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4)))],
+            Location(0, 4, 4),
+            id="escaped quote string primitive",
+        ),
     ],
 )
 def test_handle_primitive(source, location, expected_entries, expected_location):

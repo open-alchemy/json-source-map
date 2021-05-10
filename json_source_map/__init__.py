@@ -65,6 +65,7 @@ CONTROL_CHARACTER = {
     VALUE_SEPARATOR,
 }
 QUOTATION_MARK = "\u0022"
+ESCAPE = "\u005C"
 
 
 def handle_primitive(
@@ -103,7 +104,7 @@ def handle_primitive(
 
     # Check for string
     if source[current_location.position] == QUOTATION_MARK:
-        # Find the end position of the string
+        # Find the end position of the string, ignoring because py_scanstring does exist
         _, end_position = decoder.py_scanstring(  # type: ignore[attr-defined]
             source, current_location.position + 1
         )
