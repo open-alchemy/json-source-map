@@ -27,6 +27,9 @@ repos:
     rev: v0.790
     hooks:
       - id: mypy
+        args:
+          - --show-error-codes
+        exclude: ^test
   - repo: https://github.com/pre-commit/mirrors-pylint
     rev: "v2.6.0"
     hooks:

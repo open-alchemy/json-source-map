@@ -2,10 +2,11 @@
 
 import dataclasses
 import typing
+from json import decoder
 
 
 @dataclasses.dataclass
-class SourceMapEntryLocation:
+class Location:
     """
     The location of a source map entry.
 
@@ -23,7 +24,7 @@ class SourceMapEntryLocation:
 
 
 @dataclasses.dataclass
-class SourceMapEntry:
+class Entry:
     """
     The start and end location for a value in the source.
 
@@ -37,23 +38,94 @@ class SourceMapEntry:
 
     """
 
-    value: SourceMapEntryLocation
-    valueEnd: SourceMapEntryLocation
-    key: typing.Optional[SourceMapEntryLocation] = None
-    keyEnd: typing.Optional[SourceMapEntryLocation] = None
+    value_start: Location
+    value_end: Location
+    key_start: typing.Optional[Location] = None
+    key_end: typing.Optional[Location] = None
 
 
-TSourceMap = dict[str, list[SourceMapEntry]]
+TSourceMap = typing.Dict[str, typing.List[Entry]]
+SPACE = "\u0020"
+TAB = "\u0009"
+RETURN = "\u000A"
+CARRIAGE_RETURN = "\u000D"
+WHITESPACE = {SPACE, TAB, RETURN, CARRIAGE_RETURN}
+BEGIN_ARRAY = "\u005B"
+END_ARRAY = "\u005D"
+BEGIN_OBJECT = "\u007B"
+END_OBJECT = "\u007D"
+NAME_SEPARATOR = "\u003A"
+VALUE_SEPARATOR = "\u002C"
+CONTROL_CHARACTER = {
+    BEGIN_ARRAY,
+    END_ARRAY,
+    BEGIN_OBJECT,
+    END_OBJECT,
+    NAME_SEPARATOR,
+    VALUE_SEPARATOR,
+}
+QUOTATION_MARK = "\u0022"
 
 
-def calculate(source: str) -> TSourceMap:
+def handle_primitive(
+    source: str, current_location: Location
+) -> typing.List[typing.Tuple[str, Entry]]:
     """
-    Calculate the source map for a JSON value.
+    Calculate the source map of a primitive type.
 
     Args:
         source: The JSON document.
+        current_location: The current location in the source.
 
     Returns:
-        The source map for the JSON document.
+        A list of JSON pointers and source map entries.
 
     """
+    # Advance to first non-whitespace character
+    while (
+        current_location.position < len(source)
+        and source[current_location.position] in WHITESPACE
+    ):
+        if source[current_location.position] in {SPACE, TAB, CARRIAGE_RETURN}:
+            current_location.column += 1
+            current_location.position += 1
+        else:
+            current_location.line += 1
+            current_location.column = 0
+            current_location.position += 1
+
+    # The position must not be at the end of of the string
+    assert current_location.position < len(source)
+
+    value_start = Location(
+        current_location.line, current_location.column, current_location.position
+    )
+
+    # Check for string
+    if source[current_location.position] == QUOTATION_MARK:
+        # Find the end position of the string
+        _, end_position = decoder.py_scanstring(  # type: ignore[attr-defined]
+            source, current_location.position + 1
+        )
+        # py_scanstring returns the string index just after the closing quote mark
+        current_location.column += end_position - current_location.position
+        current_location.position = end_position
+
+        value_end = Location(
+            current_location.line, current_location.column, current_location.position
+        )
+        return [("", Entry(value_start=value_start, value_end=value_end))]
+
+    # Advance to the next control character, whitespace or end of source
+    while (
+        current_location.position < len(source)
+        and source[current_location.position] not in CONTROL_CHARACTER
+        and source[current_location.position] not in WHITESPACE
+    ):
+        current_location.column += 1
+        current_location.position += 1
+
+    value_end = Location(
+        current_location.line, current_location.column, current_location.position
+    )
+    return [("", Entry(value_start=value_start, value_end=value_end))]
