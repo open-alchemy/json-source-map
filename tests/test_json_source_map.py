@@ -152,6 +152,16 @@ HANDLE_ARRAY_TESTS = [
         Location(0, 2, 2),
         id="empty whitespace after",
     ),
+    pytest.param(
+        "[0]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 3, 3))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2))),
+        ],
+        Location(0, 3, 3),
+        id="single value",
+    ),
 ]
 
 

@@ -155,11 +155,20 @@ def handle_array(*, source: str, current_location: Location) -> TSourceMapEntrie
     current_location.column += 1
     current_location.position += 1
 
-    while (
-        current_location.position < len(source)
-        and source[current_location.position] != END_ARRAY
-    ):
+    array_index = 0
+    entries: TSourceMapEntries = []
+    while current_location.position < len(source):
         advance_to_next_non_whitespace(source=source, current_location=current_location)
+        # Check for array end
+        check_not_end(source=source, current_location=current_location)
+        if source[current_location.position] == END_ARRAY:
+            break
+
+        # Must have a value
+        value_entries = handle_value(source=source, current_location=current_location)
+        entries.extend(
+            (f"/{array_index}{pointer}", entry) for pointer, entry in value_entries
+        )
 
     # Must be at the array end location
     check_not_end(source=source, current_location=current_location)
@@ -171,7 +180,7 @@ def handle_array(*, source: str, current_location: Location) -> TSourceMapEntrie
         current_location.line, current_location.column, current_location.position
     )
 
-    return [("", Entry(value_start=value_start, value_end=value_end))]
+    return [("", Entry(value_start=value_start, value_end=value_end))] + entries
 
 
 def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEntries:
