@@ -127,6 +127,11 @@ def handle_value(*, source: str, current_location: Location) -> TSourceMapEntrie
         A list of JSON pointers and source map entries.
 
     """
+    advance_to_next_non_whitespace(source=source, current_location=current_location)
+    check_not_end(source=source, current_location=current_location)
+
+    if source[current_location.position] == BEGIN_ARRAY:
+        return handle_array(source=source, current_location=current_location)
     return handle_primitive(source=source, current_location=current_location)
 
 
@@ -169,7 +174,7 @@ def handle_array(*, source: str, current_location: Location) -> TSourceMapEntrie
             current_location.position += 1
             continue
         # Check for other control characters
-        if source[current_location.position] in CONTROL_CHARACTER:
+        if source[current_location.position] in {END_OBJECT, NAME_SEPARATOR}:
             raise InvalidJsonError(
                 f"invalid character {source[current_location.position]}, "
                 f"{current_location=}"

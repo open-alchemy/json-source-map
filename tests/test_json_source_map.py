@@ -7,6 +7,7 @@ from json_source_map import (
     CARRIAGE_RETURN,
     CONTROL_CHARACTER,
     END_ARRAY,
+    END_OBJECT,
     ESCAPE,
     NAME_SEPARATOR,
     QUOTATION_MARK,
@@ -106,7 +107,28 @@ HANDLE_VALUE_TESTS = [
         [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 1, 1)))],
         Location(0, 1, 1),
         id="number primitive",
-    )
+    ),
+    pytest.param(
+        f"{SPACE}0",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="number primitive whitespace before",
+    ),
+    pytest.param(
+        "[]",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="array primitive",
+    ),
+    pytest.param(
+        f"{SPACE}[]",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 3, 3)))],
+        Location(0, 3, 3),
+        id="array primitive whitespace before",
+    ),
 ]
 
 
@@ -124,6 +146,25 @@ def test_handle_value(source, location, expected_entries, expected_location):
 
     assert returned_entries == expected_entries
     assert location == expected_location
+
+
+HANDLE_VALUE_ERROR_TESTS = [
+    pytest.param("", Location(0, 1, 1), id="location after end"),
+]
+
+
+@pytest.mark.parametrize(
+    "source, location",
+    HANDLE_VALUE_ERROR_TESTS,
+)
+def test_handle_value_error(source, location):
+    """
+    GIVEN source and location
+    WHEN handle_value is called with the source and location
+    THEN InvalidJsonError is raised.
+    """
+    with pytest.raises(InvalidJsonError):
+        handle_value(source=source, current_location=location)
 
 
 HANDLE_ARRAY_TESTS = [
@@ -218,6 +259,17 @@ HANDLE_ARRAY_TESTS = [
         Location(0, 7, 7),
         id="many value",
     ),
+    pytest.param(
+        "[[0]]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 4, 4))),
+            ("/0/0", Entry(value_start=Location(0, 2, 2), value_end=Location(0, 3, 3))),
+        ],
+        Location(0, 5, 5),
+        id="nested array",
+    ),
 ]
 
 
@@ -245,7 +297,12 @@ HANDLE_ARRAY_ERROR_TESTS = [
     pytest.param(
         f"{BEGIN_ARRAY}0{NAME_SEPARATOR}{END_ARRAY}",
         Location(0, 0, 0),
-        id="invalid control character",
+        id="invalid name separator character",
+    ),
+    pytest.param(
+        f"{BEGIN_ARRAY}0{END_OBJECT}{END_ARRAY}",
+        Location(0, 0, 0),
+        id="invalid object end character",
     ),
 ]
 
