@@ -15,6 +15,7 @@ from json_source_map import (
     InvalidJsonError,
     Location,
     advance_to_next_non_whitespace,
+    handle_array,
     handle_primitive,
     handle_value,
 )
@@ -120,6 +121,75 @@ def test_handle_value(source, location, expected_entries, expected_location):
 
     assert returned_entries == expected_entries
     assert location == expected_location
+
+
+HANDLE_ARRAY_TESTS = [
+    pytest.param(
+        "[]",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="empty",
+    ),
+    pytest.param(
+        f"{SPACE}[]",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 3, 3)))],
+        Location(0, 3, 3),
+        id="empty whitespace before",
+    ),
+    pytest.param(
+        f"[{SPACE}]",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 3, 3)))],
+        Location(0, 3, 3),
+        id="empty whitespace between",
+    ),
+    pytest.param(
+        f"[]{SPACE}",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="empty whitespace after",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "source, location, expected_entries, expected_location",
+    HANDLE_ARRAY_TESTS,
+)
+def test_handle_array(source, location, expected_entries, expected_location):
+    """
+    GIVEN source, location and expected entries and location
+    WHEN handle_array is called with the source and location
+    THEN the expected entries are returned and the location is at the expected location.
+    """
+    returned_entries = handle_array(source=source, current_location=location)
+
+    assert returned_entries == expected_entries
+    assert location == expected_location
+
+
+HANDLE_ARRAY_ERROR_TESTS = [
+    pytest.param("", Location(0, 1, 1), id="location after end"),
+    pytest.param("]", Location(0, 0, 0), id="no start array"),
+    pytest.param("[", Location(0, 0, 0), id="no end array"),
+]
+
+
+@pytest.mark.parametrize(
+    "source, location",
+    HANDLE_ARRAY_ERROR_TESTS,
+)
+def test_handle_array_error(source, location):
+    """
+    GIVEN source and location
+    WHEN handle_array is called with the source and location
+    THEN InvalidJsonError is raised.
+    """
+    with pytest.raises(InvalidJsonError):
+        handle_array(source=source, current_location=location)
 
 
 HANDLE_PRIMITIVE_TESTS = (
@@ -308,8 +378,8 @@ def test_handle_primitive(source, location, expected_entries, expected_location)
 
 
 HANDLE_PRIMITIVE_ERROR_TESTS = [
-    pytest.param("", Location(0, 1, 1)),
-    pytest.param(f"{QUOTATION_MARK}", Location(0, 0, 0)),
+    pytest.param("", Location(0, 1, 1), id="location after end"),
+    pytest.param(f"{QUOTATION_MARK}", Location(0, 0, 0), id="quote without closing"),
 ]
 
 

@@ -100,6 +100,21 @@ def advance_to_next_non_whitespace(*, source: str, current_location: Location) -
             current_location.position += 1
 
 
+def check_not_end(*, source: str, current_location: Location) -> None:
+    """
+    Check that the position is not beyond the end of the document.
+
+    Args:
+        source: The JSON document.
+        current_location: The current location in the source.
+
+    """
+    if current_location.position >= len(source):
+        raise InvalidJsonError(
+            f"the JSON document ended unexpectedly, {current_location=}"
+        )
+
+
 def handle_value(*, source: str, current_location: Location) -> TSourceMapEntries:
     """
     Calculate the source map of any value.
@@ -115,6 +130,50 @@ def handle_value(*, source: str, current_location: Location) -> TSourceMapEntrie
     return handle_primitive(source=source, current_location=current_location)
 
 
+def handle_array(*, source: str, current_location: Location) -> TSourceMapEntries:
+    """
+    Calculate the source map of an array value.
+
+    Args:
+        source: The JSON document.
+        current_location: The current location in the source.
+
+    Returns:
+        A list of JSON pointers and source map entries.
+
+    """
+    advance_to_next_non_whitespace(source=source, current_location=current_location)
+
+    # Must be at the array start location
+    check_not_end(source=source, current_location=current_location)
+    if source[current_location.position] != BEGIN_ARRAY:
+        raise InvalidJsonError(f"expected an array to start, {current_location=}")
+    value_start = Location(
+        current_location.line, current_location.column, current_location.position
+    )
+
+    current_location.column += 1
+    current_location.position += 1
+
+    while (
+        current_location.position < len(source)
+        and source[current_location.position] != END_ARRAY
+    ):
+        advance_to_next_non_whitespace(source=source, current_location=current_location)
+
+    # Must be at the array end location
+    check_not_end(source=source, current_location=current_location)
+    if source[current_location.position] != END_ARRAY:
+        raise InvalidJsonError(f"expected an array to end, {current_location=}")
+    current_location.column += 1
+    current_location.position += 1
+    value_end = Location(
+        current_location.line, current_location.column, current_location.position
+    )
+
+    return [("", Entry(value_start=value_start, value_end=value_end))]
+
+
 def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEntries:
     """
     Calculate the source map of a primitive type.
@@ -128,12 +187,7 @@ def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEn
 
     """
     advance_to_next_non_whitespace(source=source, current_location=current_location)
-
-    # The position must not be at the end of of the string
-    if current_location.position >= len(source):
-        raise InvalidJsonError(
-            f"the JSON document ended unexpectedly, {current_location=}"
-        )
+    check_not_end(source=source, current_location=current_location)
 
     value_start = Location(
         current_location.line, current_location.column, current_location.position
@@ -172,4 +226,5 @@ def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEn
     value_end = Location(
         current_location.line, current_location.column, current_location.position
     )
+
     return [("", Entry(value_start=value_start, value_end=value_end))]
