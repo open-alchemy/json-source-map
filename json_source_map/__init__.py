@@ -163,6 +163,17 @@ def handle_array(*, source: str, current_location: Location) -> TSourceMapEntrie
         check_not_end(source=source, current_location=current_location)
         if source[current_location.position] == END_ARRAY:
             break
+        # Check for value separator
+        if source[current_location.position] == VALUE_SEPARATOR:
+            current_location.column += 1
+            current_location.position += 1
+            continue
+        # Check for other control characters
+        if source[current_location.position] in CONTROL_CHARACTER:
+            raise InvalidJsonError(
+                f"invalid character {source[current_location.position]}, "
+                f"{current_location=}"
+            )
 
         # Must have a value
         value_entries = handle_value(source=source, current_location=current_location)
@@ -172,8 +183,6 @@ def handle_array(*, source: str, current_location: Location) -> TSourceMapEntrie
 
     # Must be at the array end location
     check_not_end(source=source, current_location=current_location)
-    if source[current_location.position] != END_ARRAY:
-        raise InvalidJsonError(f"expected an array to end, {current_location=}")
     current_location.column += 1
     current_location.position += 1
     value_end = Location(

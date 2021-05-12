@@ -3,9 +3,12 @@
 import pytest
 
 from json_source_map import (
+    BEGIN_ARRAY,
     CARRIAGE_RETURN,
     CONTROL_CHARACTER,
+    END_ARRAY,
     ESCAPE,
+    NAME_SEPARATOR,
     QUOTATION_MARK,
     RETURN,
     SPACE,
@@ -162,6 +165,27 @@ HANDLE_ARRAY_TESTS = [
         Location(0, 3, 3),
         id="single value",
     ),
+    pytest.param(
+        "[0,]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2))),
+        ],
+        Location(0, 4, 4),
+        id="single value separator",
+    ),
+    pytest.param(
+        "[0,0]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2))),
+            ("/0", Entry(value_start=Location(0, 3, 3), value_end=Location(0, 4, 4))),
+        ],
+        Location(0, 5, 5),
+        id="multi value",
+    ),
 ]
 
 
@@ -183,8 +207,14 @@ def test_handle_array(source, location, expected_entries, expected_location):
 
 HANDLE_ARRAY_ERROR_TESTS = [
     pytest.param("", Location(0, 1, 1), id="location after end"),
-    pytest.param("]", Location(0, 0, 0), id="no start array"),
-    pytest.param("[", Location(0, 0, 0), id="no end array"),
+    pytest.param(f"{END_ARRAY}", Location(0, 0, 0), id="no start array"),
+    pytest.param(f"{BEGIN_ARRAY}}}", Location(0, 0, 0), id="no end array"),
+    pytest.param(f"{BEGIN_ARRAY}0", Location(0, 0, 0), id="no end array with value"),
+    pytest.param(
+        f"{BEGIN_ARRAY}0{NAME_SEPARATOR}{END_ARRAY}",
+        Location(0, 0, 0),
+        id="invalid control character",
+    ),
 ]
 
 
