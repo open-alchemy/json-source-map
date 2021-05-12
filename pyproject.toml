@@ -1,20 +1,48 @@
 [tool.poetry]
+authors = ["David Andersson <nderssonpublic@gmail.com>"]
+description = ""
 name = "json_source_map"
 version = "0.1.0"
-description = ""
-authors = ["David Andersson <nderssonpublic@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
 black = "^21.5b0"
+coverage = {extras = ["toml"], version = "^5.5"}
+pytest = "^6.0"
+pytest-cov = "^2.11.1"
+pytest-randomly = "^3.8.0"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0"]
 
 [tool.isort]
-profile = "black"
 multi_line_output = 3
+profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "--cov --strict-markers"
+
+[tool.coverage.run]
+branch = true
+source = ['json_source_map']
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+  # Have to re-enable the standard pragma
+  "pragma: no cover", # Don't complain about missing debug-only code:
+  "def __repr__",
+  "if self\\.debug", # Don't complain if tests don't hit defensive assertion code:
+  "raise AssertionError",
+  "raise NotImplementedError", # Don't complain if non-runnable code isn't run:
+  "if 0:",
+  "if __name__ == .__main__.:",
+  "^        \\.\\.\\.$", # Don't complain about print statements not run
+  "print\\(.*\\)",
+]
+fail_under = 100
+show_missing = true
+skip_covered = true
