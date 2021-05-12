@@ -16,6 +16,7 @@ from json_source_map import (
     Location,
     advance_to_next_non_whitespace,
     handle_primitive,
+    handle_value,
 )
 
 ADVANCE_TO_NEXT_NON_WHITESPACE_TESTS = (
@@ -91,6 +92,33 @@ def test_advance_to_next_non_whitespace(source, location, expected_location):
     """
     advance_to_next_non_whitespace(source=source, current_location=location)
 
+    assert location == expected_location
+
+
+HANDLE_VALUE_TESTS = [
+    pytest.param(
+        "0",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 1, 1)))],
+        Location(0, 1, 1),
+        id="number primitive",
+    )
+]
+
+
+@pytest.mark.parametrize(
+    "source, location, expected_entries, expected_location",
+    HANDLE_VALUE_TESTS,
+)
+def test_handle_value(source, location, expected_entries, expected_location):
+    """
+    GIVEN source, location and expected entries and location
+    WHEN handle_value is called with the source and location
+    THEN the expected entries are returned and the location is at the expected location.
+    """
+    returned_entries = handle_value(source=source, current_location=location)
+
+    assert returned_entries == expected_entries
     assert location == expected_location
 
 

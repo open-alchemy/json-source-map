@@ -100,6 +100,21 @@ def advance_to_next_non_whitespace(*, source: str, current_location: Location) -
             current_location.position += 1
 
 
+def handle_value(*, source: str, current_location: Location) -> TSourceMapEntries:
+    """
+    Calculate the source map of any value.
+
+    Args:
+        source: The JSON document.
+        current_location: The current location in the source.
+
+    Returns:
+        A list of JSON pointers and source map entries.
+
+    """
+    return handle_primitive(source=source, current_location=current_location)
+
+
 def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEntries:
     """
     Calculate the source map of a primitive type.
