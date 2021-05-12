@@ -166,6 +166,26 @@ HANDLE_ARRAY_TESTS = [
         id="single value",
     ),
     pytest.param(
+        f"[{SPACE}0]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4))),
+            ("/0", Entry(value_start=Location(0, 2, 2), value_end=Location(0, 3, 3))),
+        ],
+        Location(0, 4, 4),
+        id="single value whitespace before",
+    ),
+    pytest.param(
+        f"[0{SPACE}]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2))),
+        ],
+        Location(0, 4, 4),
+        id="single value whitespace after",
+    ),
+    pytest.param(
         "[0,]",
         Location(0, 0, 0),
         [
@@ -181,10 +201,22 @@ HANDLE_ARRAY_TESTS = [
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5))),
             ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2))),
-            ("/0", Entry(value_start=Location(0, 3, 3), value_end=Location(0, 4, 4))),
+            ("/1", Entry(value_start=Location(0, 3, 3), value_end=Location(0, 4, 4))),
         ],
         Location(0, 5, 5),
         id="multi value",
+    ),
+    pytest.param(
+        "[0,0,0]",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 7, 7))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 2, 2))),
+            ("/1", Entry(value_start=Location(0, 3, 3), value_end=Location(0, 4, 4))),
+            ("/2", Entry(value_start=Location(0, 5, 5), value_end=Location(0, 6, 6))),
+        ],
+        Location(0, 7, 7),
+        id="many value",
     ),
 ]
 

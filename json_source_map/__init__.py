@@ -180,6 +180,7 @@ def handle_array(*, source: str, current_location: Location) -> TSourceMapEntrie
         entries.extend(
             (f"/{array_index}{pointer}", entry) for pointer, entry in value_entries
         )
+        array_index += 1
 
     # Must be at the array end location
     check_not_end(source=source, current_location=current_location)
