@@ -16,9 +16,7 @@ from json_source_map import (
     handle_primitive,
 )
 
-
-@pytest.mark.parametrize(
-    "source, location, expected_entries, expected_location",
+HANDLE_PRIMITIVE_TESTS = (
     [
         pytest.param(
             "0",
@@ -210,7 +208,13 @@ from json_source_map import (
             Location(0, 4, 4),
             id="escaped quote string primitive",
         ),
-    ],
+    ]
+)
+
+
+@pytest.mark.parametrize(
+    "source, location, expected_entries, expected_location",
+    HANDLE_PRIMITIVE_TESTS,
 )
 def test_handle_primitive(source, location, expected_entries, expected_location):
     """
@@ -218,7 +222,7 @@ def test_handle_primitive(source, location, expected_entries, expected_location)
     WHEN handle_primitive is called with the source and location
     THEN the expected entries are returned and the location is at the expected location.
     """
-    returned_entries = handle_primitive(source, location)
+    returned_entries = handle_primitive(source=source, current_location=location)
 
     assert returned_entries == expected_entries
     assert location == expected_location

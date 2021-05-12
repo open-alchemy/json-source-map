@@ -44,7 +44,9 @@ class Entry:
     key_end: typing.Optional[Location] = None
 
 
+TSourceMapEntries = typing.List[typing.Tuple[str, Entry]]
 TSourceMap = typing.Dict[str, typing.List[Entry]]
+
 SPACE = "\u0020"
 TAB = "\u0009"
 RETURN = "\u000A"
@@ -68,21 +70,15 @@ QUOTATION_MARK = "\u0022"
 ESCAPE = "\u005C"
 
 
-def handle_primitive(
-    source: str, current_location: Location
-) -> typing.List[typing.Tuple[str, Entry]]:
+def advance_to_next_non_whitespace(*, source: str, current_location: Location) -> None:
     """
-    Calculate the source map of a primitive type.
+    Advance current_location to the next non-whitespace character.
 
     Args:
         source: The JSON document.
         current_location: The current location in the source.
 
-    Returns:
-        A list of JSON pointers and source map entries.
-
     """
-    # Advance to first non-whitespace character
     while (
         current_location.position < len(source)
         and source[current_location.position] in WHITESPACE
@@ -94,6 +90,21 @@ def handle_primitive(
             current_location.line += 1
             current_location.column = 0
             current_location.position += 1
+
+
+def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEntries:
+    """
+    Calculate the source map of a primitive type.
+
+    Args:
+        source: The JSON document.
+        current_location: The current location in the source.
+
+    Returns:
+        A list of JSON pointers and source map entries.
+
+    """
+    advance_to_next_non_whitespace(source=source, current_location=current_location)
 
     # The position must not be at the end of of the string
     assert current_location.position < len(source)
