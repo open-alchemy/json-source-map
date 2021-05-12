@@ -70,6 +70,14 @@ QUOTATION_MARK = "\u0022"
 ESCAPE = "\u005C"
 
 
+class BaseError(Exception):
+    """Base class for all errors."""
+
+
+class InvalidJsonError(BaseError):
+    """Raised when JSON is invalid."""
+
+
 def advance_to_next_non_whitespace(*, source: str, current_location: Location) -> None:
     """
     Advance current_location to the next non-whitespace character.
@@ -107,7 +115,10 @@ def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEn
     advance_to_next_non_whitespace(source=source, current_location=current_location)
 
     # The position must not be at the end of of the string
-    assert current_location.position < len(source)
+    if current_location.position >= len(source):
+        raise InvalidJsonError(
+            f"the JSON document ended unexpectedly, {current_location=}"
+        )
 
     value_start = Location(
         current_location.line, current_location.column, current_location.position
@@ -116,9 +127,15 @@ def handle_primitive(*, source: str, current_location: Location) -> TSourceMapEn
     # Check for string
     if source[current_location.position] == QUOTATION_MARK:
         # Find the end position of the string, ignoring because py_scanstring does exist
-        _, end_position = decoder.py_scanstring(  # type: ignore[attr-defined]
-            source, current_location.position + 1
-        )
+        try:
+            _, end_position = decoder.py_scanstring(  # type: ignore[attr-defined]
+                source, current_location.position + 1
+            )
+        except decoder.JSONDecodeError as error:
+            raise InvalidJsonError(
+                f"a string value is not valid, {current_location=}"
+            ) from error
+
         # py_scanstring returns the string index just after the closing quote mark
         current_location.column += end_position - current_location.position
         current_location.position = end_position

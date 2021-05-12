@@ -12,6 +12,7 @@ from json_source_map import (
     TAB,
     WHITESPACE,
     Entry,
+    InvalidJsonError,
     Location,
     advance_to_next_non_whitespace,
     handle_primitive,
@@ -276,3 +277,23 @@ def test_handle_primitive(source, location, expected_entries, expected_location)
 
     assert returned_entries == expected_entries
     assert location == expected_location
+
+
+HANDLE_PRIMITIVE_ERROR_TESTS = [
+    pytest.param("", Location(0, 1, 1)),
+    pytest.param(f"{QUOTATION_MARK}", Location(0, 0, 0)),
+]
+
+
+@pytest.mark.parametrize(
+    "source, location",
+    HANDLE_PRIMITIVE_ERROR_TESTS,
+)
+def test_handle_primitive_error(source, location):
+    """
+    GIVEN source and location
+    WHEN handle_primitive is called with the source and location
+    THEN InvalidJsonError is raised.
+    """
+    with pytest.raises(InvalidJsonError):
+        handle_primitive(source=source, current_location=location)
