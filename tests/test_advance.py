@@ -1,4 +1,4 @@
-"""Tests for JsonSourceMap."""
+"""Tests for functions that advance position to certain characters."""
 
 import pytest
 

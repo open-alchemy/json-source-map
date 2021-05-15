@@ -1,4 +1,4 @@
-"""Tests for JsonSourceMap."""
+"""Tests functions that check expectations."""
 
 import pytest
 

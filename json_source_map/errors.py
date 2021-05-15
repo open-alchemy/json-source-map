@@ -7,3 +7,7 @@ class BaseError(Exception):
 
 class InvalidJsonError(BaseError):
     """Raised when JSON is invalid."""
+
+
+class InvalidInputError(BaseError):
+    """Raised when input is not a string."""
