@@ -3,6 +3,13 @@
 import pytest
 
 from json_source_map import (
+    advance_to_next_non_whitespace,
+    handle_array,
+    handle_object,
+    handle_primitive,
+    handle_value,
+)
+from json_source_map.constants import (
     BEGIN_ARRAY,
     BEGIN_OBJECT,
     CARRIAGE_RETURN,
@@ -17,15 +24,9 @@ from json_source_map import (
     TAB,
     VALUE_SEPARATOR,
     WHITESPACE,
-    Entry,
-    InvalidJsonError,
-    Location,
-    advance_to_next_non_whitespace,
-    handle_array,
-    handle_object,
-    handle_primitive,
-    handle_value,
 )
+from json_source_map.errors import InvalidJsonError
+from json_source_map.types import Entry, Location
 
 ADVANCE_TO_NEXT_NON_WHITESPACE_TESTS = (
     [
