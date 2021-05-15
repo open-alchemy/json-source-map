@@ -2,107 +2,22 @@
 
 import pytest
 
-from json_source_map import (
-    advance_to_next_non_whitespace,
-    handle_array,
-    handle_object,
-    handle_primitive,
-    handle_value,
-)
+from json_source_map import handle_array, handle_object, handle_primitive, handle_value
 from json_source_map.constants import (
     BEGIN_ARRAY,
     BEGIN_OBJECT,
-    CARRIAGE_RETURN,
     CONTROL_CHARACTER,
     END_ARRAY,
     END_OBJECT,
     ESCAPE,
     NAME_SEPARATOR,
     QUOTATION_MARK,
-    RETURN,
     SPACE,
-    TAB,
     VALUE_SEPARATOR,
     WHITESPACE,
 )
 from json_source_map.errors import InvalidJsonError
 from json_source_map.types import Entry, Location
-
-ADVANCE_TO_NEXT_NON_WHITESPACE_TESTS = (
-    [
-        pytest.param("", Location(0, 0, 0), Location(0, 0, 0), id="empty at start"),
-        pytest.param(
-            "", Location(0, 1, 1), Location(0, 1, 1), id="empty at beyond end"
-        ),
-        pytest.param(
-            "a",
-            Location(0, 0, 0),
-            Location(0, 0, 0),
-            id="single not whitespace at start",
-        ),
-        pytest.param(
-            "a", Location(0, 1, 1), Location(0, 1, 1), id="single not whitespace at end"
-        ),
-    ]
-    + [
-        pytest.param(
-            f"{whitespace}",
-            Location(0, 0, 0),
-            Location(0, 1, 1),
-            id=f"single whitespace {repr(whitespace)}",
-        )
-        for whitespace in [SPACE, TAB, CARRIAGE_RETURN]
-    ]
-    + [
-        pytest.param(
-            f"{SPACE}{SPACE}",
-            Location(0, 0, 0),
-            Location(0, 2, 2),
-            id="multiple same line whitespace",
-        ),
-        pytest.param(
-            f"{SPACE}{SPACE}{SPACE}",
-            Location(0, 0, 0),
-            Location(0, 3, 3),
-            id="many same line whitespace",
-        ),
-    ]
-    + [
-        pytest.param(
-            f"{RETURN}",
-            Location(0, 0, 0),
-            Location(1, 0, 1),
-            id="single new line whitespace",
-        ),
-        pytest.param(
-            f"{RETURN}{RETURN}",
-            Location(0, 0, 0),
-            Location(2, 0, 2),
-            id="multiple new line whitespace",
-        ),
-        pytest.param(
-            f"{RETURN}{RETURN}{RETURN}",
-            Location(0, 0, 0),
-            Location(3, 0, 3),
-            id="many new line whitespace",
-        ),
-    ]
-)
-
-
-@pytest.mark.parametrize(
-    "source, location, expected_location", ADVANCE_TO_NEXT_NON_WHITESPACE_TESTS
-)
-def test_advance_to_next_non_whitespace(source, location, expected_location):
-    """
-    GIVEN source, location and expected location
-    WHEN advance_to_next_non_whitespace is called with the source and location
-    THEN the location is equal to the expected location.
-    """
-    advance_to_next_non_whitespace(source=source, current_location=location)
-
-    assert location == expected_location
-
 
 HANDLE_VALUE_TESTS = [
     pytest.param(

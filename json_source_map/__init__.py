@@ -2,35 +2,7 @@
 
 from json import decoder
 
-from . import constants, errors, types
-
-
-def advance_to_next_non_whitespace(
-    *, source: str, current_location: types.Location
-) -> None:
-    """
-    Advance current_location to the next non-whitespace character.
-
-    Args:
-        source: The JSON document.
-        current_location: The current location in the source.
-
-    """
-    while (
-        current_location.position < len(source)
-        and source[current_location.position] in constants.WHITESPACE
-    ):
-        if source[current_location.position] in {
-            constants.SPACE,
-            constants.TAB,
-            constants.CARRIAGE_RETURN,
-        }:
-            current_location.column += 1
-            current_location.position += 1
-        else:
-            current_location.line += 1
-            current_location.column = 0
-            current_location.position += 1
+from . import advance, constants, errors, types
 
 
 def check_not_end(*, source: str, current_location: types.Location) -> None:
@@ -62,7 +34,7 @@ def handle_value(
         A list of JSON pointers and source map entries.
 
     """
-    advance_to_next_non_whitespace(source=source, current_location=current_location)
+    advance.to_next_non_whitespace(source=source, current_location=current_location)
     check_not_end(source=source, current_location=current_location)
 
     if source[current_location.position] == constants.BEGIN_ARRAY:
@@ -86,7 +58,7 @@ def handle_object(
         A list of JSON pointers and source map entries.
 
     """
-    advance_to_next_non_whitespace(source=source, current_location=current_location)
+    advance.to_next_non_whitespace(source=source, current_location=current_location)
 
     # Must be at the object start location
     check_not_end(source=source, current_location=current_location)
@@ -103,7 +75,7 @@ def handle_object(
 
     entries: types.TSourceMapEntries = []
     while current_location.position < len(source):
-        advance_to_next_non_whitespace(source=source, current_location=current_location)
+        advance.to_next_non_whitespace(source=source, current_location=current_location)
         # Check for object end
         check_not_end(source=source, current_location=current_location)
         if source[current_location.position] == constants.END_OBJECT:
@@ -141,7 +113,7 @@ def handle_object(
         key_value = source[key_start.position + 1 : key_end.position - 1]
 
         # Handle value
-        advance_to_next_non_whitespace(source=source, current_location=current_location)
+        advance.to_next_non_whitespace(source=source, current_location=current_location)
         check_not_end(source=source, current_location=current_location)
         if source[current_location.position] != constants.NAME_SEPARATOR:
             raise errors.InvalidJsonError(
@@ -197,7 +169,7 @@ def handle_array(
         A list of JSON pointers and source map entries.
 
     """
-    advance_to_next_non_whitespace(source=source, current_location=current_location)
+    advance.to_next_non_whitespace(source=source, current_location=current_location)
 
     # Must be at the array start location
     check_not_end(source=source, current_location=current_location)
@@ -215,7 +187,7 @@ def handle_array(
     array_index = 0
     entries: types.TSourceMapEntries = []
     while current_location.position < len(source):
-        advance_to_next_non_whitespace(source=source, current_location=current_location)
+        advance.to_next_non_whitespace(source=source, current_location=current_location)
         # Check for array end
         check_not_end(source=source, current_location=current_location)
         if source[current_location.position] == constants.END_ARRAY:
@@ -267,7 +239,7 @@ def handle_primitive(
         A list of JSON pointers and source map entries.
 
     """
-    advance_to_next_non_whitespace(source=source, current_location=current_location)
+    advance.to_next_non_whitespace(source=source, current_location=current_location)
     check_not_end(source=source, current_location=current_location)
 
     value_start = types.Location(
