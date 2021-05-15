@@ -14,9 +14,9 @@ json_strategy = strategies.recursive(
     | strategies.booleans()
     | strategies.floats(allow_infinity=False, allow_nan=False)
     | strategies.text(string.ascii_letters),
-    lambda children: strategies.lists(children, min_size=0)
+    lambda children: strategies.lists(children, min_size=0, max_size=5)
     | strategies.dictionaries(
-        strategies.text(string.ascii_letters), children, min_size=0
+        strategies.text(string.ascii_letters), children, min_size=0, max_size=5
     ),
 )
 
