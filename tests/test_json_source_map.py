@@ -62,6 +62,7 @@ def test_calculate(source, expected_source_map):
 CALCULATE_ERROR_TESTS = [
     pytest.param(True, id="not string"),
     pytest.param("", id="empty string"),
+    pytest.param("invalid JSON", id="invalid JSON"),
 ]
 
 
