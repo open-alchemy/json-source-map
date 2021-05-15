@@ -6,6 +6,10 @@ more information see: <https://github.com/open-alchemy/json-source-map/wiki>.
 
 For example:
 
+```bash
+python -m pip install json_source_map
+```
+
 ```Python
 from json_source_map import calculate
 
