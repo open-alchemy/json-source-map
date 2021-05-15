@@ -534,6 +534,67 @@ def test_handle_object(source, location, expected_entries, expected_location):
     assert location == expected_location
 
 
+HANDLE_OBJECT_ERROR_TESTS = [
+    pytest.param("", Location(0, 1, 1), id="location after end"),
+    pytest.param(f"{END_OBJECT}", Location(0, 0, 0), id="no start object"),
+    pytest.param(f"{BEGIN_OBJECT}", Location(0, 0, 0), id="no end object"),
+    pytest.param(
+        f"{BEGIN_OBJECT}{QUOTATION_MARK}{QUOTATION_MARK}",
+        Location(0, 0, 0),
+        id="no end object with value",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{QUOTATION_MARK}{QUOTATION_MARK}{SPACE}",
+        Location(0, 0, 0),
+        id="no end object with value and whitespace",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{BEGIN_OBJECT}{END_OBJECT}",
+        Location(0, 0, 0),
+        id=f"invalid control character {BEGIN_OBJECT}",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{BEGIN_ARRAY}{END_OBJECT}",
+        Location(0, 0, 0),
+        id=f"invalid control character {BEGIN_ARRAY}",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{END_ARRAY}{END_OBJECT}",
+        Location(0, 0, 0),
+        id=f"invalid control character {END_ARRAY}",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{NAME_SEPARATOR}{END_OBJECT}",
+        Location(0, 0, 0),
+        id=f"invalid control character {NAME_SEPARATOR}",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{QUOTATION_MARK}{QUOTATION_MARK}{SPACE}{END_OBJECT}",
+        Location(0, 0, 0),
+        id="missing name separator",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{QUOTATION_MARK}{QUOTATION_MARK}{NAME_SEPARATOR}",
+        Location(0, 0, 0),
+        id="name separator end",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "source, location",
+    HANDLE_OBJECT_ERROR_TESTS,
+)
+def test_handle_object_error(source, location):
+    """
+    GIVEN source and location
+    WHEN handle_object is called with the source and location
+    THEN InvalidJsonError is raised.
+    """
+    with pytest.raises(InvalidJsonError):
+        handle_object(source=source, current_location=location)
+
+
 HANDLE_ARRAY_TESTS = [
     pytest.param(
         f"{BEGIN_ARRAY}{END_ARRAY}",
@@ -680,7 +741,7 @@ def test_handle_array(source, location, expected_entries, expected_location):
 HANDLE_ARRAY_ERROR_TESTS = [
     pytest.param("", Location(0, 1, 1), id="location after end"),
     pytest.param(f"{END_ARRAY}", Location(0, 0, 0), id="no start array"),
-    pytest.param(f"{BEGIN_ARRAY}}}", Location(0, 0, 0), id="no end array"),
+    pytest.param(f"{BEGIN_ARRAY}{END_OBJECT}", Location(0, 0, 0), id="no end array"),
     pytest.param(f"{BEGIN_ARRAY}0", Location(0, 0, 0), id="no end array with value"),
     pytest.param(
         f"{BEGIN_ARRAY}0{NAME_SEPARATOR}{END_ARRAY}",
