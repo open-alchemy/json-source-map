@@ -44,4 +44,4 @@ class Entry:
 
 
 TSourceMapEntries = typing.List[typing.Tuple[str, Entry]]
-TSourceMap = typing.Dict[str, typing.List[Entry]]
+TSourceMap = typing.Dict[str, Entry]

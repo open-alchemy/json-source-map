@@ -1,6 +1,6 @@
 """Calculate the JSON source map."""
 
-from . import errors, types
+from . import errors, handle, types
 
 
 def calculate(source: str) -> types.TSourceMap:
@@ -16,5 +16,7 @@ def calculate(source: str) -> types.TSourceMap:
     """
     if not isinstance(source, str):
         raise errors.InvalidInputError(f"source must be a string, got {type(source)}")
+    if not source:
+        raise errors.InvalidInputError("source must not be empty")
 
-    return {}
+    return dict(handle.value(source=source, current_location=types.Location(0, 0, 0)))
