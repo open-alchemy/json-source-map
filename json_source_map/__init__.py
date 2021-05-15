@@ -2,22 +2,7 @@
 
 from json import decoder
 
-from . import advance, constants, errors, types
-
-
-def check_not_end(*, source: str, current_location: types.Location) -> None:
-    """
-    Check that the position is not beyond the end of the document.
-
-    Args:
-        source: The JSON document.
-        current_location: The current location in the source.
-
-    """
-    if current_location.position >= len(source):
-        raise errors.InvalidJsonError(
-            f"the JSON document ended unexpectedly, {current_location=}"
-        )
+from . import advance, check, constants, errors, types
 
 
 def handle_value(
@@ -35,7 +20,7 @@ def handle_value(
 
     """
     advance.to_next_non_whitespace(source=source, current_location=current_location)
-    check_not_end(source=source, current_location=current_location)
+    check.not_end(source=source, current_location=current_location)
 
     if source[current_location.position] == constants.BEGIN_ARRAY:
         return handle_array(source=source, current_location=current_location)
@@ -61,7 +46,7 @@ def handle_object(
     advance.to_next_non_whitespace(source=source, current_location=current_location)
 
     # Must be at the object start location
-    check_not_end(source=source, current_location=current_location)
+    check.not_end(source=source, current_location=current_location)
     if source[current_location.position] != constants.BEGIN_OBJECT:
         raise errors.InvalidJsonError(
             f"expected an object to start, {current_location=}"
@@ -77,7 +62,7 @@ def handle_object(
     while current_location.position < len(source):
         advance.to_next_non_whitespace(source=source, current_location=current_location)
         # Check for object end
-        check_not_end(source=source, current_location=current_location)
+        check.not_end(source=source, current_location=current_location)
         if source[current_location.position] == constants.END_OBJECT:
             break
         # Check for value separator
@@ -104,7 +89,7 @@ def handle_object(
             position=current_location.position,
         )
         handle_value(source=source, current_location=current_location)
-        check_not_end(source=source, current_location=current_location)
+        check.not_end(source=source, current_location=current_location)
         key_end = types.Location(
             line=current_location.line,
             column=current_location.column,
@@ -114,7 +99,7 @@ def handle_object(
 
         # Handle value
         advance.to_next_non_whitespace(source=source, current_location=current_location)
-        check_not_end(source=source, current_location=current_location)
+        check.not_end(source=source, current_location=current_location)
         if source[current_location.position] != constants.NAME_SEPARATOR:
             raise errors.InvalidJsonError(
                 f"expected name separator but got {source[current_location.position]}, "
@@ -122,7 +107,7 @@ def handle_object(
             )
         current_location.column += 1
         current_location.position += 1
-        check_not_end(source=source, current_location=current_location)
+        check.not_end(source=source, current_location=current_location)
         value_entries = iter(
             handle_value(source=source, current_location=current_location)
         )
@@ -145,7 +130,7 @@ def handle_object(
         )
 
     # Must be at the object end location
-    check_not_end(source=source, current_location=current_location)
+    check.not_end(source=source, current_location=current_location)
     current_location.column += 1
     current_location.position += 1
     value_end = types.Location(
@@ -172,7 +157,7 @@ def handle_array(
     advance.to_next_non_whitespace(source=source, current_location=current_location)
 
     # Must be at the array start location
-    check_not_end(source=source, current_location=current_location)
+    check.not_end(source=source, current_location=current_location)
     if source[current_location.position] != constants.BEGIN_ARRAY:
         raise errors.InvalidJsonError(
             f"expected an array to start, {current_location=}"
@@ -189,7 +174,7 @@ def handle_array(
     while current_location.position < len(source):
         advance.to_next_non_whitespace(source=source, current_location=current_location)
         # Check for array end
-        check_not_end(source=source, current_location=current_location)
+        check.not_end(source=source, current_location=current_location)
         if source[current_location.position] == constants.END_ARRAY:
             break
         # Check for value separator
@@ -215,7 +200,7 @@ def handle_array(
         array_index += 1
 
     # Must be at the array end location
-    check_not_end(source=source, current_location=current_location)
+    check.not_end(source=source, current_location=current_location)
     current_location.column += 1
     current_location.position += 1
     value_end = types.Location(
@@ -240,7 +225,7 @@ def handle_primitive(
 
     """
     advance.to_next_non_whitespace(source=source, current_location=current_location)
-    check_not_end(source=source, current_location=current_location)
+    check.not_end(source=source, current_location=current_location)
 
     value_start = types.Location(
         current_location.line, current_location.column, current_location.position
