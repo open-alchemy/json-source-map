@@ -536,35 +536,35 @@ def test_handle_object(source, location, expected_entries, expected_location):
 
 HANDLE_ARRAY_TESTS = [
     pytest.param(
-        "[]",
+        f"{BEGIN_ARRAY}{END_ARRAY}",
         Location(0, 0, 0),
         [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
         Location(0, 2, 2),
         id="empty",
     ),
     pytest.param(
-        f"{SPACE}[]",
+        f"{SPACE}{BEGIN_ARRAY}{END_ARRAY}",
         Location(0, 0, 0),
         [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 3, 3)))],
         Location(0, 3, 3),
         id="empty whitespace before",
     ),
     pytest.param(
-        f"[{SPACE}]",
+        f"{BEGIN_ARRAY}{SPACE}{END_ARRAY}",
         Location(0, 0, 0),
         [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 3, 3)))],
         Location(0, 3, 3),
         id="empty whitespace between",
     ),
     pytest.param(
-        f"[]{SPACE}",
+        f"{BEGIN_ARRAY}{END_ARRAY}{SPACE}",
         Location(0, 0, 0),
         [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
         Location(0, 2, 2),
         id="empty whitespace after",
     ),
     pytest.param(
-        "[0]",
+        f"{BEGIN_ARRAY}0{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 3, 3))),
@@ -574,7 +574,7 @@ HANDLE_ARRAY_TESTS = [
         id="single value",
     ),
     pytest.param(
-        f"[{SPACE}0]",
+        f"{BEGIN_ARRAY}{SPACE}0{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4))),
@@ -584,7 +584,7 @@ HANDLE_ARRAY_TESTS = [
         id="single value whitespace before",
     ),
     pytest.param(
-        f"[0{SPACE}]",
+        f"{BEGIN_ARRAY}0{SPACE}{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4))),
@@ -594,7 +594,7 @@ HANDLE_ARRAY_TESTS = [
         id="single value whitespace after",
     ),
     pytest.param(
-        "[0,]",
+        f"{BEGIN_ARRAY}0,{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 4, 4))),
@@ -604,7 +604,7 @@ HANDLE_ARRAY_TESTS = [
         id="single value separator",
     ),
     pytest.param(
-        "[0,0]",
+        f"{BEGIN_ARRAY}0,0{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5))),
@@ -615,7 +615,7 @@ HANDLE_ARRAY_TESTS = [
         id="multi value",
     ),
     pytest.param(
-        "[0,0,0]",
+        f"{BEGIN_ARRAY}0,0,0{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 7, 7))),
@@ -627,7 +627,7 @@ HANDLE_ARRAY_TESTS = [
         id="many value",
     ),
     pytest.param(
-        "[[0]]",
+        f"{BEGIN_ARRAY}{BEGIN_ARRAY}0{END_ARRAY}{END_ARRAY}",
         Location(0, 0, 0),
         [
             ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 5, 5))),
@@ -636,6 +636,27 @@ HANDLE_ARRAY_TESTS = [
         ],
         Location(0, 5, 5),
         id="nested array",
+    ),
+    pytest.param(
+        f"{BEGIN_ARRAY}{BEGIN_OBJECT}"
+        f"{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}0"
+        f"{END_OBJECT}{END_ARRAY}",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 11, 11))),
+            ("/0", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 10, 10))),
+            (
+                "/0/key",
+                Entry(
+                    value_start=Location(0, 8, 8),
+                    value_end=Location(0, 9, 9),
+                    key_start=Location(0, 2, 2),
+                    key_end=Location(0, 7, 7),
+                ),
+            ),
+        ],
+        Location(0, 11, 11),
+        id="nested object",
     ),
 ]
 
