@@ -132,7 +132,116 @@ def handle_value(*, source: str, current_location: Location) -> TSourceMapEntrie
 
     if source[current_location.position] == BEGIN_ARRAY:
         return handle_array(source=source, current_location=current_location)
+    if source[current_location.position] == BEGIN_OBJECT:
+        return handle_object(source=source, current_location=current_location)
     return handle_primitive(source=source, current_location=current_location)
+
+
+def handle_object(*, source: str, current_location: Location) -> TSourceMapEntries:
+    """
+    Calculate the source map of an object value.
+
+    Args:
+        source: The JSON document.
+        current_location: The current location in the source.
+
+    Returns:
+        A list of JSON pointers and source map entries.
+
+    """
+    advance_to_next_non_whitespace(source=source, current_location=current_location)
+
+    # Must be at the object start location
+    check_not_end(source=source, current_location=current_location)
+    if source[current_location.position] != BEGIN_OBJECT:
+        raise InvalidJsonError(f"expected an object to start, {current_location=}")
+    value_start = Location(
+        current_location.line, current_location.column, current_location.position
+    )
+
+    current_location.column += 1
+    current_location.position += 1
+
+    entries: TSourceMapEntries = []
+    while current_location.position < len(source):
+        advance_to_next_non_whitespace(source=source, current_location=current_location)
+        # Check for object end
+        check_not_end(source=source, current_location=current_location)
+        if source[current_location.position] == END_OBJECT:
+            break
+        # Check for value separator
+        if source[current_location.position] == VALUE_SEPARATOR:
+            current_location.column += 1
+            current_location.position += 1
+            continue
+        # Check for other control characters
+        if source[current_location.position] in {
+            BEGIN_OBJECT,
+            BEGIN_ARRAY,
+            END_ARRAY,
+            NAME_SEPARATOR,
+        }:
+            raise InvalidJsonError(
+                f"invalid character {source[current_location.position]}, "
+                f"{current_location=}"
+            )
+
+        # Must have a key
+        key_start = Location(
+            line=current_location.line,
+            column=current_location.column,
+            position=current_location.position,
+        )
+        handle_value(source=source, current_location=current_location)
+        check_not_end(source=source, current_location=current_location)
+        key_end = Location(
+            line=current_location.line,
+            column=current_location.column,
+            position=current_location.position,
+        )
+        key_value = source[key_start.position + 1 : key_end.position - 1]
+
+        # Handle value
+        advance_to_next_non_whitespace(source=source, current_location=current_location)
+        check_not_end(source=source, current_location=current_location)
+        if source[current_location.position] != NAME_SEPARATOR:
+            raise InvalidJsonError(
+                f"expected name separator but got {source[current_location.position]}, "
+                f"{current_location=}"
+            )
+        current_location.column += 1
+        current_location.position += 1
+        check_not_end(source=source, current_location=current_location)
+        value_entries = iter(
+            handle_value(source=source, current_location=current_location)
+        )
+        value_entry = next(value_entries)
+
+        # Write pointers
+        entries.append(
+            (
+                f"/{key_value}",
+                Entry(
+                    value_start=value_entry[1].value_start,
+                    value_end=value_entry[1].value_end,
+                    key_start=key_start,
+                    key_end=key_end,
+                ),
+            )
+        )
+        entries.extend(
+            (f"/{key_value}{pointer}", entry) for pointer, entry in value_entries
+        )
+
+    # Must be at the object end location
+    check_not_end(source=source, current_location=current_location)
+    current_location.column += 1
+    current_location.position += 1
+    value_end = Location(
+        current_location.line, current_location.column, current_location.position
+    )
+
+    return [("", Entry(value_start=value_start, value_end=value_end))] + entries
 
 
 def handle_array(*, source: str, current_location: Location) -> TSourceMapEntries:

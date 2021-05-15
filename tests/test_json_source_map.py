@@ -4,6 +4,7 @@ import pytest
 
 from json_source_map import (
     BEGIN_ARRAY,
+    BEGIN_OBJECT,
     CARRIAGE_RETURN,
     CONTROL_CHARACTER,
     END_ARRAY,
@@ -14,12 +15,14 @@ from json_source_map import (
     RETURN,
     SPACE,
     TAB,
+    VALUE_SEPARATOR,
     WHITESPACE,
     Entry,
     InvalidJsonError,
     Location,
     advance_to_next_non_whitespace,
     handle_array,
+    handle_object,
     handle_primitive,
     handle_value,
 )
@@ -165,6 +168,356 @@ def test_handle_value_error(source, location):
     """
     with pytest.raises(InvalidJsonError):
         handle_value(source=source, current_location=location)
+
+
+HANDLE_OBJECT_TESTS = [
+    pytest.param(
+        f"{BEGIN_OBJECT}{END_OBJECT}]",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="empty",
+    ),
+    pytest.param(
+        f"{SPACE}{BEGIN_OBJECT}{END_OBJECT}",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 3, 3)))],
+        Location(0, 3, 3),
+        id="empty whitespace before",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{SPACE}{END_OBJECT}",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 3, 3)))],
+        Location(0, 3, 3),
+        id="empty whitespace between",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{END_OBJECT}{SPACE}",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="empty whitespace after",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"0{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 9, 9))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 7, 7),
+                    value_end=Location(0, 8, 8),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+        ],
+        Location(0, 9, 9),
+        id="single value",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{QUOTATION_MARK}{QUOTATION_MARK}{NAME_SEPARATOR}0{END_OBJECT}",
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 6, 6))),
+            (
+                "/",
+                Entry(
+                    value_start=Location(0, 4, 4),
+                    value_end=Location(0, 5, 5),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 3, 3),
+                ),
+            ),
+        ],
+        Location(0, 6, 6),
+        id="single value empty key",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{SPACE}{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"0{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 10, 10))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 8, 8),
+                    value_end=Location(0, 9, 9),
+                    key_start=Location(0, 2, 2),
+                    key_end=Location(0, 7, 7),
+                ),
+            ),
+        ],
+        Location(0, 10, 10),
+        id="single value whitespace before",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{QUOTATION_MARK}key{QUOTATION_MARK}{SPACE}{NAME_SEPARATOR}"
+            f"0{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 10, 10))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 8, 8),
+                    value_end=Location(0, 9, 9),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+        ],
+        Location(0, 10, 10),
+        id="single value whitespace after key",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"{SPACE}0{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 10, 10))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 8, 8),
+                    value_end=Location(0, 9, 9),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+        ],
+        Location(0, 10, 10),
+        id="single value whitespace after name separator",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"0{SPACE}{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 10, 10))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 7, 7),
+                    value_end=Location(0, 8, 8),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+        ],
+        Location(0, 10, 10),
+        id="single value whitespace after value",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"0{END_OBJECT}{SPACE}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 9, 9))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 7, 7),
+                    value_end=Location(0, 8, 8),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+        ],
+        Location(0, 9, 9),
+        id="single value whitespace after",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"0{VALUE_SEPARATOR}{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 10, 10))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 7, 7),
+                    value_end=Location(0, 8, 8),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+        ],
+        Location(0, 10, 10),
+        id="single value value separator",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}"
+            f"{QUOTATION_MARK}key_1{QUOTATION_MARK}{NAME_SEPARATOR}0{VALUE_SEPARATOR}"
+            f"{QUOTATION_MARK}key_2{QUOTATION_MARK}{NAME_SEPARATOR}0"
+            f"{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 21, 21))),
+            (
+                "/key_1",
+                Entry(
+                    value_start=Location(0, 9, 9),
+                    value_end=Location(0, 10, 10),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 8, 8),
+                ),
+            ),
+            (
+                "/key_2",
+                Entry(
+                    value_start=Location(0, 19, 19),
+                    value_end=Location(0, 20, 20),
+                    key_start=Location(0, 11, 11),
+                    key_end=Location(0, 18, 18),
+                ),
+            ),
+        ],
+        Location(0, 21, 21),
+        id="multi value",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}"
+            f"{QUOTATION_MARK}key_1{QUOTATION_MARK}{NAME_SEPARATOR}0{VALUE_SEPARATOR}"
+            f"{QUOTATION_MARK}key_2{QUOTATION_MARK}{NAME_SEPARATOR}0{VALUE_SEPARATOR}"
+            f"{QUOTATION_MARK}key_3{QUOTATION_MARK}{NAME_SEPARATOR}0{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 31, 31))),
+            (
+                "/key_1",
+                Entry(
+                    value_start=Location(0, 9, 9),
+                    value_end=Location(0, 10, 10),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 8, 8),
+                ),
+            ),
+            (
+                "/key_2",
+                Entry(
+                    value_start=Location(0, 19, 19),
+                    value_end=Location(0, 20, 20),
+                    key_start=Location(0, 11, 11),
+                    key_end=Location(0, 18, 18),
+                ),
+            ),
+            (
+                "/key_3",
+                Entry(
+                    value_start=Location(0, 29, 29),
+                    value_end=Location(0, 30, 30),
+                    key_start=Location(0, 21, 21),
+                    key_end=Location(0, 28, 28),
+                ),
+            ),
+        ],
+        Location(0, 31, 31),
+        id="many value",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}"
+            f"{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"{BEGIN_ARRAY}0{END_ARRAY}"
+            f"{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 11, 11))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 7, 7),
+                    value_end=Location(0, 10, 10),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+            (
+                "/key/0",
+                Entry(
+                    value_start=Location(0, 8, 8),
+                    value_end=Location(0, 9, 9),
+                ),
+            ),
+        ],
+        Location(0, 11, 11),
+        id="nested array",
+    ),
+    pytest.param(
+        (
+            f"{BEGIN_OBJECT}"
+            f"{QUOTATION_MARK}key{QUOTATION_MARK}{NAME_SEPARATOR}"
+            f"{BEGIN_OBJECT}"
+            f"{QUOTATION_MARK}nestedKey{QUOTATION_MARK}{NAME_SEPARATOR}0"
+            f"{END_OBJECT}"
+            f"{END_OBJECT}"
+        ),
+        Location(0, 0, 0),
+        [
+            ("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 23, 23))),
+            (
+                "/key",
+                Entry(
+                    value_start=Location(0, 7, 7),
+                    value_end=Location(0, 22, 22),
+                    key_start=Location(0, 1, 1),
+                    key_end=Location(0, 6, 6),
+                ),
+            ),
+            (
+                "/key/nestedKey",
+                Entry(
+                    value_start=Location(0, 20, 20),
+                    value_end=Location(0, 21, 21),
+                    key_start=Location(0, 8, 8),
+                    key_end=Location(0, 19, 19),
+                ),
+            ),
+        ],
+        Location(0, 23, 23),
+        id="nested object",
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "source, location, expected_entries, expected_location",
+    HANDLE_OBJECT_TESTS,
+)
+def test_handle_object(source, location, expected_entries, expected_location):
+    """
+    GIVEN source, location and expected entries and location
+    WHEN handle_object is called with the source and location
+    THEN the expected entries are returned and the location is at the expected location.
+    """
+    returned_entries = handle_object(source=source, current_location=location)
+
+    assert returned_entries == expected_entries
+    assert location == expected_location
 
 
 HANDLE_ARRAY_TESTS = [
