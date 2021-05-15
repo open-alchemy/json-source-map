@@ -1,8 +1,30 @@
 [tool.poetry]
 authors = ["David Andersson <nderssonpublic@gmail.com>"]
-description = ""
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Development Status :: 5 - Production/Stable",
+  "Natural Language :: English",
+  "Topic :: Software Development :: Documentation",
+  "Topic :: Software Development :: Disassemblers",
+  "Topic :: Text Processing",
+  "Topic :: Utilities",
+  "Typing :: Typed",
+]
+description = "Calculate the source map for a JSON document."
+documentation = "https://github.com/open-alchemy/json-source-map/wiki"
+exclude = ["tests", ".vscode", ".github"]
+homepage = "https://github.com/open-alchemy/json-source-map/wiki"
+keywords = ["Python", "JSON", "source map"]
 name = "json_source_map"
-version = "1.0.0"
+packages = [
+  {include = "json_source_map"},
+]
+readme = "README.md"
+repository = "https://github.com/open-alchemy/json-source-map"
+version = "1.0.1"
 
 [tool.poetry.dependencies]
 hypothesis = "^6.12.0"

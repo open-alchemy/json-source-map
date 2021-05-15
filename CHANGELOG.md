@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [v1.0.0] - 2021-05-15
+## [v1.0.1] - 2021-05-15
 
 ### Added
 
@@ -16,5 +16,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for space, tab, carriage and return whitespace.
 
 [//]: # "Release links"
-[v1.0.0]: https://github.com/open-alchemy/json-source-map/releases/v1.0.0
+[v1.0.1]: https://github.com/open-alchemy/json-source-map/releases/v1.0.1
 [///]: # "Issue/PR links"
