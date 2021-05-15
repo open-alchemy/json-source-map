@@ -119,18 +119,32 @@ HANDLE_VALUE_TESTS = [
         id="number primitive whitespace before",
     ),
     pytest.param(
-        "[]",
+        f"{BEGIN_ARRAY}{END_ARRAY}",
         Location(0, 0, 0),
         [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
         Location(0, 2, 2),
-        id="array primitive",
+        id="array",
     ),
     pytest.param(
-        f"{SPACE}[]",
+        f"{SPACE}{BEGIN_ARRAY}{END_ARRAY}",
         Location(0, 0, 0),
         [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 3, 3)))],
         Location(0, 3, 3),
-        id="array primitive whitespace before",
+        id="array whitespace before",
+    ),
+    pytest.param(
+        f"{BEGIN_OBJECT}{END_OBJECT}",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 0, 0), value_end=Location(0, 2, 2)))],
+        Location(0, 2, 2),
+        id="object",
+    ),
+    pytest.param(
+        f"{SPACE}{BEGIN_OBJECT}{END_OBJECT}",
+        Location(0, 0, 0),
+        [("", Entry(value_start=Location(0, 1, 1), value_end=Location(0, 3, 3)))],
+        Location(0, 3, 3),
+        id="object whitespace before",
     ),
 ]
 
