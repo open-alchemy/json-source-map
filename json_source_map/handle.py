@@ -47,7 +47,7 @@ def object_(
     check.not_end(source=source, current_location=current_location)
     if source[current_location.position] != constants.BEGIN_OBJECT:
         raise errors.InvalidJsonError(
-            f"expected an object to start, {current_location=}"
+            f"expected an object to start, current_location={current_location}"
         )
     value_start = types.Location(
         current_location.line, current_location.column, current_location.position
@@ -77,7 +77,7 @@ def object_(
         }:
             raise errors.InvalidJsonError(
                 f"invalid character {source[current_location.position]}, "
-                f"{current_location=}"
+                f"current_location={current_location}"
             )
 
         # Must have a key
@@ -101,7 +101,7 @@ def object_(
         if source[current_location.position] != constants.NAME_SEPARATOR:
             raise errors.InvalidJsonError(
                 f"expected name separator but got {source[current_location.position]}, "
-                f"{current_location=}"
+                f"current_location={current_location}"
             )
         current_location.column += 1
         current_location.position += 1
@@ -154,7 +154,7 @@ def array(*, source: str, current_location: types.Location) -> types.TSourceMapE
     check.not_end(source=source, current_location=current_location)
     if source[current_location.position] != constants.BEGIN_ARRAY:
         raise errors.InvalidJsonError(
-            f"expected an array to start, {current_location=}"
+            f"expected an array to start, current_location={current_location}"
         )
     value_start = types.Location(
         current_location.line, current_location.column, current_location.position
@@ -183,7 +183,7 @@ def array(*, source: str, current_location: types.Location) -> types.TSourceMapE
         }:
             raise errors.InvalidJsonError(
                 f"invalid character {source[current_location.position]}, "
-                f"{current_location=}"
+                f"current_location={current_location}"
             )
 
         # Must have a value
@@ -234,7 +234,7 @@ def primitive(
             )
         except decoder.JSONDecodeError as error:
             raise errors.InvalidJsonError(
-                f"a string value is not valid, {current_location=}"
+                f"a string value is not valid, current_location={current_location}"
             ) from error
 
         # py_scanstring returns the string index just after the closing quote mark

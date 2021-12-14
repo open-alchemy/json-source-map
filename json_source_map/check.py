@@ -14,5 +14,5 @@ def not_end(*, source: str, current_location: types.Location) -> None:
     """
     if current_location.position >= len(source):
         raise errors.InvalidJsonError(
-            f"the JSON document ended unexpectedly, {current_location=}"
+            f"the JSON document ended unexpectedly, current_location={current_location}"
         )
