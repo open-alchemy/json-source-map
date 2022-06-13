@@ -1,6 +1,6 @@
 {
   "name": "json-source-map",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Generate a source map from a JSON Document in Python",
   "main": "index.js",
   "repository": {
