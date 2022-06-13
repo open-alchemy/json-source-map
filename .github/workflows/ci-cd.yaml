@@ -20,17 +20,17 @@ jobs:
           - 3.10
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ python-version }}
+          python-version: ${{ matrix.python-version }}
       - name: Install poetry
         run: pip install poetry
       - uses: actions/cache@v3
         id: cache-poetry
         with:
           path: ~/.virtualenvs
-          key: ${{ runner.os }}-python${{ python-version }}-poetry-${{ hashFiles('poetry.lock', 'poetry.toml') }}
+          key: ${{ runner.os }}-python${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock', 'poetry.toml') }}
       - name: Configure poetry for ci
         run: |
           poetry config virtualenvs.in-project false --local
