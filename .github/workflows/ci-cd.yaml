@@ -16,8 +16,8 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - 3.9
-          - 3.10
+          - "3.9"
+          - "3.10"
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
@@ -76,7 +76,7 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v3.0.0
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
