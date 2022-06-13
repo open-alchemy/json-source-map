@@ -36,6 +36,23 @@ The above prints:
 }
 ```
 
+Where:
+
+- each key in the dictionary is a JSON path to an item,
+- each value in the dictionarty contains the mapping of the item at the JSON
+  path which have the following properties:
+  - `value_start` is the start of the value,
+  - `value_end` is the end of the value,
+  - `key_start` is the start of the key (which is `None` at the root level and
+    for array items),
+  - `key_end` is the end of the key (which is `None` at the root level and for
+    array items) and
+- each of the above have the following properties:
+  - `line` is the zero-indexed line position,
+  - `column` is the zero-indexed column position and
+  - `position` is the zero-indexed character position in the string
+    (independent of the line and column).
+
 The following features have been implemented:
 
 - support for primitive types (`strings`, `numbers`, `booleans` and `null`),
