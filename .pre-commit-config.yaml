@@ -64,3 +64,4 @@ repos:
     hooks:
       - id: markdownlint-cli2
         language_version: system
+        exclude_rule: "MD024"
