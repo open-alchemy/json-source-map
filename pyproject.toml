@@ -26,7 +26,7 @@ packages = [
 ]
 readme = "README.md"
 repository = "https://github.com/open-alchemy/json-source-map"
-version = "1.0.3"
+version = "1.0.4"
 
 [tool.poetry.dependencies]
 python = "^3.8"
