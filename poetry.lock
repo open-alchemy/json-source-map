@@ -88,7 +88,7 @@ test = ["pytest (>=6)"]
 
 [[package]]
 name = "hypothesis"
-version = "6.47.5"
+version = "6.50.1"
 description = "A library for property-based testing"
 category = "main"
 optional = false
@@ -383,8 +383,8 @@ exceptiongroup = [
     {file = "exceptiongroup-1.0.0rc8.tar.gz", hash = "sha256:6990c24f06b8d33c8065cfe43e5e8a4bfa384e0358be036af9cc60b6321bd11a"},
 ]
 hypothesis = [
-    {file = "hypothesis-6.47.5-py3-none-any.whl", hash = "sha256:87049b781ee11ec1c7948565b889ab02e428a1e32d427ab4de8fdb3649242d06"},
-    {file = "hypothesis-6.47.5.tar.gz", hash = "sha256:e0c1e253fc97e7ecdb9e2bbff2cf815d8739e0d1d3d093d67c3af5bb6a7211b0"},
+    {file = "hypothesis-6.50.1-py3-none-any.whl", hash = "sha256:b69c6152dc0e346e228757f76895d6351e8872394b6da3bf1deac26de6cc6956"},
+    {file = "hypothesis-6.50.1.tar.gz", hash = "sha256:1a19ade3b27825cab622c95fcf25182a27a42f97589c163173fcbdafb8621d1e"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-4.0.1-py3-none-any.whl", hash = "sha256:d7eb1dea6d6a6086f8be21784cc9e3bcfa55872b52309bc5fad53a8ea444465d"},
