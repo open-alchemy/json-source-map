@@ -37,7 +37,7 @@ coverage = {extras = ["toml"], version = "^6.4"}
 pytest = "^7.1"
 pytest-cov = "^3.0.0"
 pytest-randomly = "^3.12.0"
-hypothesis = "^6.53.0"
+hypothesis = "^6.54.4"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
