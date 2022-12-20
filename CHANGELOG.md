@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v1.0.5] - 2022-12-20
+
+### Added
+
+- Add support for Python 3.11
+
 ## [v1.0.4] - 2022-07-14
 
 ### Fixed
@@ -38,4 +44,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.0.2]: https://github.com/open-alchemy/json-source-map/releases/v1.0.2
 [v1.0.3]: https://github.com/open-alchemy/json-source-map/releases/v1.0.3
 [v1.0.4]: https://github.com/open-alchemy/json-source-map/releases/v1.0.4
-[///]: # "Issue/PR links"
+[v1.0.5]: https://github.com/open-alchemy/json-source-map/releases/v1.0.5
