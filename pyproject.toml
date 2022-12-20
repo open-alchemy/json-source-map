@@ -5,6 +5,7 @@ classifiers = [
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "License :: OSI Approved :: Apache Software License",
   "Operating System :: OS Independent",
   "Development Status :: 5 - Production/Stable",
@@ -26,7 +27,7 @@ packages = [
 ]
 readme = "README.md"
 repository = "https://github.com/open-alchemy/json-source-map"
-version = "1.0.4"
+version = "1.0.5"
 
 [tool.poetry.dependencies]
 python = "^3.8"
