@@ -45,4 +45,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [v1.0.3]: https://github.com/open-alchemy/json-source-map/releases/v1.0.3
 [v1.0.4]: https://github.com/open-alchemy/json-source-map/releases/v1.0.4
 [v1.0.5]: https://github.com/open-alchemy/json-source-map/releases/v1.0.5
-[///]: # "Issue/PR links"
