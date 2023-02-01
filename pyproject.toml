@@ -33,7 +33,7 @@ version = "1.0.5"
 python = "^3.8"
 
 [tool.poetry.dev-dependencies]
-black = "^22.12"
+black = "^23.1"
 coverage = {extras = ["toml"], version = "^7.0"}
 pytest = "^7.2"
 pytest-cov = "^4.0.0"
