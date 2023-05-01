@@ -34,7 +34,7 @@ python = "^3.8"
 
 [tool.poetry.dev-dependencies]
 black = "^23"
-coverage = {extras = ["toml"], version = "^7.0"}
+coverage = {extras = ["toml"], version = "^7.2"}
 pytest = "^7"
 pytest-cov = "^4"
 pytest-randomly = "^3"
