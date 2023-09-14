@@ -61,3 +61,4 @@ The following features have been implemented:
 hello
 goodbye
 hello again
+goodbye again
