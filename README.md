@@ -59,3 +59,4 @@ The following features have been implemented:
 - support for structural types (`array` and `object`) and
 - support for space, tab, carriage and return whitespace.
 hello
+goodbye
